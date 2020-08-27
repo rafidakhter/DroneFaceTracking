@@ -1,0 +1,51 @@
+from utils import *
+import cv2
+
+#input parameters
+w,h=360,240
+pidx = [0.5,0.4]
+pidy = [0.5,0.4]
+pidz = [0.5,0.4]
+pid=[pidx,pidy,pidz]
+pError=[0,0,0]
+
+# communication and capturing video from tello
+myDrone=initializeTello()
+fourcc=cv2.VideoWriter_fourcc(*'XVID')
+out=cv2.VideoWriter('testvideo.mp4',fourcc,20.0,(360,240))
+
+testcheck=1
+
+while True:
+    # take off if test check =1
+    if testcheck==0:
+        myDrone.takeoff()
+
+    # step 1
+    img = telloGetFrame(myDrone,w,h)
+
+    # step 2
+    img,info = findFace(img)
+    print(info[0][0])
+
+    #Step 3
+    pError = trackFace(myDrone,info,w,pid,pError)
+
+
+
+    out.write(img)
+    cv2.imshow('Image',img)
+
+    key=cv2.waitKey(40)
+
+    if key == 27:
+        break
+
+myDrone.land()
+myDrone.streamoff()
+cv2.destroyAllWindows()
+
+
+
+
+
